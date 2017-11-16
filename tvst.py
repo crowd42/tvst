@@ -3,6 +3,7 @@
 
 import os
 import sys
+import requests
 
 from tvst_functions import add_show, create_table, update_tvshow, search_show,\
     menu, delete_show, display_tvshows, filter_by_day, banner
@@ -10,6 +11,9 @@ from tvst_functions import add_show, create_table, update_tvshow, search_show,\
 
 def main():
     """ Main program"""
+
+    url = 'http://www.omdbapi.com'
+    api_key = '50e91ed2'
 
     os.system('clear')
     banner()
@@ -25,10 +29,24 @@ def main():
             # If choice equal 1, rpompt the user to add a show
             elif choice == 1:
                 title = input('Title: ')
+                # We need this to construct our url and get the exact we're
+                # looking for, for exmaple there's a movie and tvshow called
+                # Me, Myself and I
+                show_type = input('show type (series/movies): ')
                 airing_day = input('Airing day: ')
                 season = input('Season: ')
                 episode = input('Episode: ')
-                add_show(title, airing_day, season, episode)
+                payloads = {'t': title, 'type': show_type, 'apikey': api_key}
+                resp = requests.get(url, params=payloads)
+                data = resp.json()
+                add_show(data['Title'],
+                         airing_day,
+                         season,
+                         data['totalSeasons'],
+                         data['Genre'],
+                         episode,
+                         data['imdbID'],
+                         data['imdbRating'])
 
             elif choice == 2:
                 title = input('Title: ').title()

@@ -56,18 +56,33 @@ def menu():
 def create_table():
     c.execute("""CREATE TABLE IF NOT EXISTS tvshows(
         id INTEGER PRIMARY KEY,
-        title TEXT,
+        title TEXT UNIQUE,
         airing_day TEXT,
         season INTEGER,
-        episode INTERGER)""")
+        totalSeasons INTEGER,
+        genre TEXT,
+        episode INTERGER,
+        imdbID TEXT,
+        imdbRating TEXT)""")
     db.commit()
 
 
-def add_show(title, airing_day, season, episode):
+def add_show(title, airing_day, season, totalSeasons,
+             genre, episode, imdbID, imdbRating):
     """Add  a tv show to the database."""
 
-    c.execute("INSERT INTO tvshows (title, airing_day, season, episode)\
-                  VALUES (?, ?, ?, ?)", (title, airing_day, season, episode))
+    c.execute("""INSERT INTO tvshows (title,
+              airing_day,
+              season,
+              totalSeasons,
+              genre,
+              episode,
+              imdbID,
+              imdbRating
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", (title, airing_day, season,
+                                                     totalSeasons, genre,
+                                                     episode, imdbID,
+                                                     imdbRating))
     db.commit()
 
 
