@@ -76,8 +76,8 @@ def add_show(conn, show_infos):
               episode,
               imdbID,
               imdbRating
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", show_infos
-    cur.execute(insert_query)
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
+    cur.execute(insert_query, show_infos)
 
 
 def update_tvshow(conn, show_details):

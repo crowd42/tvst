@@ -57,7 +57,7 @@ def main():
                                   data['imdbID'],
                                   data['imdbRating'])
                     with conn:
-                        add_show(conn, show_infos)
+                        add_show(conn, (show_infos))
                 except KeyError:
                     print("This show doesn't exist!")
 
@@ -88,8 +88,9 @@ def main():
 
             else:
                 print('Please type a number between 0 and 6.')
-        except ValueError:
+        except ValueError as e:
             print('You did not enter a valid number!')
+            print(e)
             continue
 
 
