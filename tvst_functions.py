@@ -2,41 +2,25 @@
 # -*- coding: UTF-8 -*-
 
 import sqlite3
-import sys
 
 from colorama import init, Fore, Style
-from PIL import Image, ImageDraw, ImageFont
 from prettytable import from_db_cursor
-
-# Make the connection to the database.
-db = sqlite3.connect('tvst.db')
-c = db.cursor()
 
 
 def banner():
 
-    ShowText = 'TVST'
+    init()
+    print(Fore.GREEN + """
+_________          _______ _________
+\__   __/|\     /|(  ____ \\__   __/
+   ) (   | )   ( || (    \/   ) (
+   | |   | |   | || (_____    | |
+   | |   ( (   ) )(_____  )   | |
+   | |    \ \_/ /       ) |   | |
+   | |     \   /  /\____) |   | |
+   )_(      \_/   \_______)   )_(
 
-    font = ImageFont.truetype('arialbd.ttf', 15)  # load the font
-    size = font.getsize(ShowText)  # calc the size of text in pixels
-    image = Image.new('1', size, 1)  # create a b/w image
-    draw = ImageDraw.Draw(image)
-    draw.text((0, 0), ShowText, font=font)  # render the text to the bitmap
-    for rownum in range(size[1]):
-        # scan the bitmap:
-        # print ' ' for black pixel and
-        # print '*' for white one
-        line = []
-        for colnum in range(size[0]):
-            if image.getpixel((colnum, rownum)):
-                line.append(' '),
-            else:
-                line.append('*')
-
-        # strip colors if stdout is redirected
-        init(strip=not sys.stdout.isatty())
-        print(Fore.RED + ''.join(line) + Style.RESET_ALL)
-    print('\n\t\tby crowd42')
+          """ + Style.RESET_ALL + "by crowd42")
 
 
 def menu():
@@ -53,8 +37,20 @@ def menu():
           """)
 
 
-def create_table():
-    c.execute("""CREATE TABLE IF NOT EXISTS tvshows(
+def create_connection(db_file):
+    """ Create a database connection to the SQLite databse specified by
+    db_file
+    """
+
+    conn = sqlite3.connect(db_file)
+    return conn
+
+
+def create_table(conn):
+    """ Create a table in the database."""
+
+    cur = conn.cursor()
+    create_table_query = """CREATE TABLE IF NOT EXISTS tvshows(
         id INTEGER PRIMARY KEY,
         title TEXT UNIQUE,
         airing_day TEXT,
@@ -63,15 +59,16 @@ def create_table():
         genre TEXT,
         episode INTERGER,
         imdbID TEXT,
-        imdbRating TEXT)""")
-    db.commit()
+        imdbRating TEXT)"""
+
+    cur.execute(create_table_query)
 
 
-def add_show(title, airing_day, season, totalSeasons,
-             genre, episode, imdbID, imdbRating):
+def add_show(conn, show_infos):
     """Add  a tv show to the database."""
 
-    c.execute("""INSERT INTO tvshows (title,
+    cur = conn.cursor()
+    insert_query = """INSERT INTO tvshows (title,
               airing_day,
               season,
               totalSeasons,
@@ -79,14 +76,11 @@ def add_show(title, airing_day, season, totalSeasons,
               episode,
               imdbID,
               imdbRating
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", (title, airing_day, season,
-                                                     totalSeasons, genre,
-                                                     episode, imdbID,
-                                                     imdbRating))
-    db.commit()
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", show_infos
+    cur.execute(insert_query)
 
 
-def update_tvshow(show_details):
+def update_tvshow(conn, show_details):
     """Update a tvshow."""
 
     update_query = """UPDATE tvshows
@@ -94,37 +88,40 @@ def update_tvshow(show_details):
     season = ?,
     episode = ?
     WHERE title = ?"""
-    c.execute(update_query, show_details)
-    db.commit()
+    cur = conn.cursor()
+    cur.execute(update_query, show_details)
 
 
-def delete_show(title):
+def delete_show(conn, title):
     """Detele a tvshow from the database"""
 
     del_query = "DELETE FROM tvshows WHERE title = ?"
-    c.execute(del_query, title)
-    db.commit()
+    cur = conn.cursor()
+    cur.execute(del_query, title)
 
 
-def display_tvshows():
+def display_tvshows(conn):
     """List all the tvshows in the database"""
 
-    rows = c.execute("SELECT * FROM tvshows")
+    cur = conn.cursor()
+    rows = cur.execute("SELECT * FROM tvshows")
     tvshows = from_db_cursor(rows)
     return tvshows
 
 
-def search_show(title):
+def search_show(conn, title):
     """Search for a tvshow in the database"""
 
-    row = c.execute("SELECT * FROM tvshows WHERE title = ?", (title,))
+    cur = conn.cursor()
+    row = cur.execute("SELECT * FROM tvshows WHERE title = ?", (title,))
     tvshow = from_db_cursor(row)
     return tvshow
 
 
-def filter_by_day(day):
+def filter_by_day(conn, day):
     """Return all the the tvhsows airing at a given day."""
 
-    rows = c.execute("SELECT * FROM tvshows where airing_day = ?", (day,))
+    cur = conn.cursor()
+    rows = cur.execute("SELECT * FROM tvshows where airing_day = ?", (day,))
     tvshows = from_db_cursor(rows)
     return tvshows
