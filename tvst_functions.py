@@ -92,6 +92,30 @@ def update_tvshow(conn, show_details):
     cur.execute(update_query, show_details)
 
 
+def update_airing_day(conn, airing_day):
+    """ Update the airing day of a tvshow"""
+
+    update_query = "UPDATE tvshows SET airing_day = ? WHERE title = ?"
+    cur = conn.cursor()
+    cur.execute(update_query, airing_day)
+
+
+def update_last_episode(conn, episode):
+    """ Update the last episode been watched"""
+
+    update_query = "UPDATE tvshows SET episode = ? WHERE title = ?"
+    cur = conn.cursor()
+    cur.execute(update_query, episode)
+
+
+def update_season(conn, season):
+    """ Update the current season been watched"""
+
+    update_query = "UPDATE tvshows SET season = ?WHERE title = ?"
+    cur = conn.cursor()
+    cur.execute(update_query, season)
+
+
 def delete_show(conn, title):
     """Detele a tvshow from the database"""
 
