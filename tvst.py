@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
+import pandas.io.sql as sql
 import os
 import sys
 import requests
@@ -30,9 +31,9 @@ def main():
         menu()
 
         choice = input('tvst> ')
-        if choice == '0' or 'exit' or 'quit':
+        if choice == '0' or choice == 'exit' or choice == 'quit':
             print('See you later o/')
-            sys.exit(1)
+            sys.exit()
 
         # If choice equal 1, rpompt the user to add a show
         elif choice == '1':
@@ -128,9 +129,18 @@ def main():
             with conn:
                 tvshows = filter_by_day(conn, airing_day)
                 print(tvshows)
+        elif choice == '7':
+            with conn:
+                table = sql.read_sql("SELECT * FROM tvshows", conn)
+                table.to_csv('output.csv')
+                if os.path.exists('output.csv'):
+                    print('The export executed with success!')
+                else:
+                    print('The export failed.')
 
         else:
             print('Please type a number between 0 and 6.')
+
 
 if __name__ == '__main__':
     main()
