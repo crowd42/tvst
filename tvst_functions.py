@@ -33,7 +33,8 @@ def menu():
           4) List all the tvshows.
           5) Search for a show
           6) Filter by day.
-          7) Export the database as a csv file.
+          7) Search for tv show in IMDB site.
+          8) Export the database as csv file
           0) Exit TVST
           """)
 

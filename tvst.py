@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-import pandas.io.sql as sql
 import os
 import sys
+import pandas.io.sql as sql
 import requests
 
 from tvst_functions import add_show, create_table, update_tvshow, search_show,\
@@ -23,7 +23,7 @@ def main():
     create_table(conn)
     url = 'http://www.omdbapi.com'
     # api key from omdbapi.com, you can get one for free.
-    api_key = ''
+    api_key = '50e91ed2'
 
     banner()
 
@@ -80,6 +80,7 @@ def main():
             update_options = input('option: ')
             if update_options == '0':
                 continue
+
             # Update the airing day, the last epsiode been watched and
             # the last season
             elif update_options == '1':
@@ -87,49 +88,80 @@ def main():
                 airing_day = input('Airing day: ')
                 season = input('Season: ')
                 episode = input('Episode: ')
+
                 with conn:
                     update_tvshow(
                         conn, (airing_day, season, episode, title))
             # Update the airing day of tvshow
+
             elif update_options == '2':
                 title = input('Title: ').title()
                 airing_day = input('Airinf day: ').capitalize()
                 with conn:
                     update_airing_day(conn, (airing_day, title))
+
             # Update the last episode been watched
             elif update_options == '3':
                 title = input('Title: ').title()
                 episode = input('Episode: ')
                 with conn:
                     update_last_episode(conn, (episode, title))
+
             # Update the current season been watched
             elif update_options == '4':
                 title = input('Title: ').title()
                 season = input('Season: ')
                 with conn:
                     update_season(conn, (season, title))
+
         # Delete a tvshow.
         elif choice == '3':
             title = input('Title: ').title()
             delete_show(conn, (title,))
+
         # Display all the tvshows stored in the database.
         elif choice == '4':
             with conn:
                 tvshows = display_tvshows(conn)
                 print(tvshows)
 
+        # Search for a show in the database
         elif choice == '5':
             title = input('Title: ').title()
             with conn:
                 tvshow = search_show(conn, title)
                 print(tvshow)
 
+        # Search for the tvshows airing a given day
         elif choice == '6':
             airing_day = input('Airing day: ').capitalize()
             with conn:
                 tvshows = filter_by_day(conn, airing_day)
                 print(tvshows)
+
         elif choice == '7':
+            title = input('Title: ')
+            show_type = input('Tvshow type: ')
+            search_payloads = {
+                't': title,
+                'type': show_type,
+                'plot': 'full',
+                'apikey': api_key}
+            resp = requests.get(url, params=search_payloads)
+            data = resp.json()
+            print(
+                '* Title: ' +
+                data['Title'] +
+                '\n* Genre: ' +
+                data['Genre'] +
+                ' \n* Seasons: ' +
+                data['totalSeasons'] +
+                '\n* IMDB ratings: ' +
+                data['imdbRating'] +
+                '\n* Plot: ' +
+                data['Plot'])
+        # Export the the tvshows as a csv file.
+        elif choice == '8':
             with conn:
                 table = sql.read_sql("SELECT * FROM tvshows", conn)
                 table.to_csv('output.csv')
